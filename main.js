@@ -24,6 +24,13 @@ module.exports.loop = function () {
             return structure.structureType == STRUCTURE_EXTENSION;
         },
     });
+   
+    
+    const tower = spawn.room.find(FIND_STRUCTURES, {
+        filter: (structure) => {
+            return structure.structureType == STRUCTURE_TOWER;
+        },
+    });
     // get extensions that are being build
     const extensionsUnderConstruction = spawn.room.find(FIND_CONSTRUCTION_SITES, {
         filter: (site) => {
@@ -49,6 +56,7 @@ module.exports.loop = function () {
         if ( structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN ) 
             totalEnergy += structure.energy;
     }
+    
     
     //conitional Tasks for Level 1
     if (roomControlLevel === 1) {
@@ -81,6 +89,12 @@ module.exports.loop = function () {
         
 
     }
+    if(roomControlLevel==3){
+        if(tower.length == 0){
+            spawn.room.createConstructionSite(3,27, STRUCTURE_TOWER)
+        }
+        
+    }
     
     //Minimum Creep Limits
     
@@ -100,6 +114,22 @@ module.exports.loop = function () {
                 spawn.spawnCreep( [WORK, CARRY, MOVE], 'builder' + Game.time, { memory: { role: 'builder' }});
     }
     
+    // Kill Hostile sources
+    if(tower.length>0){
+        const towerIds = tower.map(item => item.id);
+ 
+        for (const towerId of towerIds) {
+            const tower = Game.getObjectById(towerId);
+        
+            if (tower) {
+                const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+                if (closestHostile) {
+                    tower.attack(closestHostile);
+                }
+            }
+        }
+
+    }
     
     
 
@@ -128,7 +158,6 @@ module.exports.loop = function () {
             roleBuilder.run(creep);
         }
         if (creep.memory.role == "attacker") {
-            console.log("attacker enter")
             roleAttacker.run(creep);
         }
     }
