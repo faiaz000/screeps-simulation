@@ -16,8 +16,10 @@ var roleBuilder = {
             // get Extensions requiring energy
             const needEnergyExtensions = creep.room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
-                    return structure.structureType === STRUCTURE_EXTENSION &&
-                           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    if (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_TOWER) {
+                        return structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                    }
+                    return false; // Exclude other structure types
                 }
             });
             //Provide energy to extensions

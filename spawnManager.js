@@ -1,43 +1,34 @@
-var roleUpgrader = {
-
-    /** @param {Creep} creep **/
-    run: function(creep) {
-
-        // Cases for switching states
-        if(creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.upgrading = false;
-            creep.say('🔄 harvest');
-        }
-        if(!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
-            creep.memory.upgrading = true;
-            creep.say('⚡ upgrade');
-        }
-        //Upgrade the controller
-        if(creep.memory.upgrading) {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffafff'}});
-            }
-        }
-        //Get energy from Source
-        else {
-            const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE, {
-                filter: source => {
-                    // Check for hostile creeps or Source Keepers near the source
-                    const nearbyHostiles = source.pos.findInRange(FIND_HOSTILE_CREEPS, 5);
-                    const nearbySourceKeepers = source.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5, {
-                        filter: structure => structure.structureType === STRUCTURE_KEEPER_LAIR
-                    });
+module.exports = {
+    createExtensionsAndSpawn: function(roomName) {
+        const room = Game.rooms[roomName];
+        const extensions = room.find(FIND_STRUCTURES, {
+            filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
+        });
+        
+        if (extensions.length === 0 && extensionsUnderConstruction.length < 5) {
+            console.log("Creating extensions...");
+            // Create construction sites for extensions
+            const spawnPos = Game.spawns["Spawn1"].pos;
+            const positions = [
+                [2, 0], [-2, 0], [4, 0], [-4, 0], [6, 0]
+            ];
             
-                    return nearbyHostiles.length === 0 && nearbySourceKeepers.length === 0;
-                }
+            for (const position of positions) {
+                const x = spawnPos.x + position[0];
+                const y = spawnPos.y + position[1];
+                room.createConstructionSite(x, y, STRUCTURE_EXTENSION);
+            }
+            
+            // Change roles of existing creeps
+            for (const name in Game.creeps) {
+                const creep = Game.creeps[name];
+                creep.memory.role = "builder";
+            }
+            
+            // Spawn a new builder creep
+            Game.spawns["Spawn1"].spawnCreep([WORK, CARRY, MOVE], "builder" + Game.time, {
+                memory: { role: "builder" }
             });
-            
-            if(creep.harvest(source) === ERR_NOT_IN_RANGE){
-                creep.moveTo(source);
-            }
-            
         }
     }
 };
-
-module.exports = roleUpgrader;

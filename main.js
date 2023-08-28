@@ -26,7 +26,7 @@ module.exports.loop = function () {
     });
    
     
-    const tower = spawn.room.find(FIND_STRUCTURES, {
+    const towers = spawn.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
             return structure.structureType == STRUCTURE_TOWER;
         },
@@ -115,8 +115,8 @@ module.exports.loop = function () {
     }
     
     // Kill Hostile sources
-    if(tower.length>0){
-        const towerIds = tower.map(item => item.id);
+    if(towers.length>0){
+        const towerIds = tower.map(tower => tower.id);
  
         for (const towerId of towerIds) {
             const tower = Game.getObjectById(towerId);
