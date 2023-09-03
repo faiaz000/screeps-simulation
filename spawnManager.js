@@ -4,6 +4,9 @@ module.exports = {
         const extensions = room.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType === STRUCTURE_EXTENSION
         });
+        const extensionsUnderConstruction = room.find(FIND_CONSTRUCTION_SITES, {
+              filter: (site) => site.structureType == STRUCTURE_EXTENSION
+        });
         
         if (extensions.length === 0 && extensionsUnderConstruction.length < 5) {
             console.log("Creating extensions...");
